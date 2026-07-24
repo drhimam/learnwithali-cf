@@ -1,3 +1,5 @@
+export const runtime = 'edge'
+
 import { v4 as uuidv4 } from 'uuid'
 import { NextResponse } from 'next/server'
 import { getDb } from '@/lib/db'
@@ -39,7 +41,7 @@ async function handleRoute(request, { params }) {
   const method = request.method
 
   try {
-    const d = await getDb();
+    const db = await getDb();
 
     // Health check (public)
     if (route === '/' && method === 'GET') {
@@ -64,7 +66,7 @@ async function handleRoute(request, { params }) {
         lastPlayed: null,
         createdAt: new Date(),
       }
-      d.users.create(user)
+      db.users.create(user)
       const { password_hash: _, ...safeUser } = user
       return handleCORS(NextResponse.json({ user: safeUser, progress: [] }))
     }
@@ -125,12 +127,12 @@ async function handleRoute(request, { params }) {
       }
 
       const coins = Math.max(0, Number(coinsEarned) || 0)
-      d.users.updateCoinsStreak(userId, coins, streak, now)
+      db.users.updateCoinsStreak(userId, coins, streak, now)
 
       // Upsert progress, keeping the best score/stars
       const newStars = Number(stars) || 0
       const newScore = Number(score) || 0
-      d.progress.upsert({
+      db.progress.upsert({
         userId,
         worldId,
         levelNumber: Number(levelNumber),
@@ -143,8 +145,8 @@ async function handleRoute(request, { params }) {
         lastCompletedAt: now,
       })
 
-      const updatedUser = db.users.getById(userId)
-      const progress = db.progress.getById(userId)
+      const updatedUser = await db.users.getById(userId)
+      const progress = await db.progress.getById(userId)
       return handleCORS(NextResponse.json({ user: updatedUser, progress }))
     }
 

@@ -15,7 +15,7 @@ const nextConfig = {
       { protocol: 'https', hostname: 'avatars.githubusercontent.com', pathname: '/**' },
     ],
   },
-  webpack(config, { dev }) {
+  webpack(config, { dev, isServer }) {
     if (dev) {
       // Reduce CPU/memory from file watching
       config.watchOptions = {
@@ -24,6 +24,18 @@ const nextConfig = {
         ignored: ['**/node_modules'],
       };
     }
+    // Exclude Node.js-only modules from edge/client bundles
+    // better-sqlite3 uses native bindings that cannot run in Cloudflare Workers
+    config.externals = [
+      ...(config.externals || []),
+      ({ request }, callback) => {
+        const nodeOnly = ['better-sqlite3', 'fs', 'path', 'os', 'crypto', 'child_process'];
+        if (nodeOnly.some((m) => request === m || request?.startsWith(m + '/'))) {
+          return callback(null, `commonjs ${request}`);
+        }
+        callback();
+      },
+    ];
     return config;
   },
   async headers() {
