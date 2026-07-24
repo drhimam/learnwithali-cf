@@ -1,0 +1,16 @@
+name = "learnwithali"
+compatibility_date = "2025-07-24"
+pages_build_output_dir = ".vercel/output/static"
+
+[[d1_databases]]
+binding = "DB"
+database_name = "learnwithali-db"
+database_id = ""  # Fill after running: wrangler d1 create learnwithali-db
+
+[[env.production.d1_databases]]
+binding = "DB"
+database_name = "learnwithali-db-prod"
+database_id = ""  # Fill after running: wrangler d1 create learnwithali-db-prod
+
+[vars]
+# JWT_SECRET must be set via `wrangler secret put JWT_SECRET` — NEVER hardcode here
