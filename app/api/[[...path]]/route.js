@@ -81,11 +81,11 @@ async function handleRoute(request, { params }) {
       if (authUserId !== path[1]) {
         return handleCORS(NextResponse.json({ error: 'Forbidden' }, { status: 403 }))
       }
-      const user = db.users.getById(path[1])
+      const user = await db.users.getById(path[1])
       if (!user) {
         return handleCORS(NextResponse.json({ error: 'profile not found' }, { status: 404 }))
       }
-      const progress = db.progress.getById(path[1])
+      const progress = await db.progress.getById(path[1])
       return handleCORS(NextResponse.json({ user, progress }))
     }
 
@@ -107,7 +107,7 @@ async function handleRoute(request, { params }) {
         return handleCORS(NextResponse.json({ error: 'Forbidden' }, { status: 403 }))
       }
 
-      const user = db.users.getById(userId)
+      const user = await db.users.getById(userId)
       if (!user) {
         return handleCORS(NextResponse.json({ error: 'profile not found' }, { status: 404 }))
       }
@@ -127,12 +127,12 @@ async function handleRoute(request, { params }) {
       }
 
       const coins = Math.max(0, Number(coinsEarned) || 0)
-      db.users.updateCoinsStreak(userId, coins, streak, now)
+      await db.users.updateCoinsStreak(userId, coins, streak, now)
 
       // Upsert progress, keeping the best score/stars
       const newStars = Number(stars) || 0
       const newScore = Number(score) || 0
-      db.progress.upsert({
+      await db.progress.upsert({
         userId,
         worldId,
         levelNumber: Number(levelNumber),
@@ -152,7 +152,7 @@ async function handleRoute(request, { params }) {
 
     // Leaderboard - GET /api/leaderboard (public - shows only names, avatars, coins)
     if (route === '/leaderboard' && method === 'GET') {
-      const top = db.leaderboard.getTop(10)
+      const top = await db.leaderboard.getTop(10)
       return handleCORS(NextResponse.json({ leaderboard: top }))
     }
 
@@ -173,7 +173,7 @@ async function handleRoute(request, { params }) {
         return handleCORS(NextResponse.json({ error: 'Password must be at least 6 characters' }, { status: 400 }))
       }
 
-      const existing = db.users.getByEmail(email.toLowerCase().trim())
+      const existing = await db.users.getByEmail(email.toLowerCase().trim())
       if (existing) {
         return handleCORS(NextResponse.json({ error: 'An account with this email already exists' }, { status: 409 }))
       }
@@ -192,7 +192,7 @@ async function handleRoute(request, { params }) {
         createdAt: new Date(),
       }
 
-      d.users.create(user)
+      await db.users.create(user)
       const token = await signToken({ userId: user.id, email: user.email })
       const { password_hash: _, ...safeUser } = user
       return handleCORS(NextResponse.json({ user: safeUser, token, progress: [] }, { status: 201 }))
@@ -207,7 +207,7 @@ async function handleRoute(request, { params }) {
         return handleCORS(NextResponse.json({ error: 'Email and password are required' }, { status: 400 }))
       }
 
-      const user = db.users.getByEmail(email.toLowerCase().trim())
+      const user = await db.users.getByEmail(email.toLowerCase().trim())
       if (!user) {
         return handleCORS(NextResponse.json({ error: 'Invalid email or password' }, { status: 401 }))
       }
@@ -219,7 +219,7 @@ async function handleRoute(request, { params }) {
 
       const token = await signToken({ userId: user.id, email: user.email })
       const { password_hash: _, ...safeUser } = user
-      const progress = db.progress.getById(user.id)
+      const progress = await db.progress.getById(user.id)
       return handleCORS(NextResponse.json({ user: safeUser, token, progress }))
     }
 
@@ -229,11 +229,11 @@ async function handleRoute(request, { params }) {
       if (!authUserId) {
         return handleCORS(NextResponse.json({ error: 'Unauthorized' }, { status: 401 }))
       }
-      const user = db.users.getById(authUserId)
+      const user = await db.users.getById(authUserId)
       if (!user) {
         return handleCORS(NextResponse.json({ error: 'User not found' }, { status: 404 }))
       }
-      const progress = db.progress.getById(authUserId)
+      const progress = await db.progress.getById(authUserId)
       return handleCORS(NextResponse.json({ user, progress }))
     }
 
