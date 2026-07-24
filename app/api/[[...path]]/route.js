@@ -1,6 +1,6 @@
 import { v4 as uuidv4 } from 'uuid'
 import { NextResponse } from 'next/server'
-import db from '@/lib/db'
+import { getDb } from '@/lib/db'
 import { signToken, verifyToken } from '@/lib/auth/jwt'
 import { hashPassword, comparePassword } from '@/lib/auth/password'
 
@@ -39,6 +39,8 @@ async function handleRoute(request, { params }) {
   const method = request.method
 
   try {
+    const d = await getDb();
+
     // Health check (public)
     if (route === '/' && method === 'GET') {
       return handleCORS(NextResponse.json({ message: 'LearnWithAli API', ok: true }))
@@ -62,7 +64,7 @@ async function handleRoute(request, { params }) {
         lastPlayed: null,
         createdAt: new Date(),
       }
-      db.users.create(user)
+      d.users.create(user)
       const { password_hash: _, ...safeUser } = user
       return handleCORS(NextResponse.json({ user: safeUser, progress: [] }))
     }
@@ -123,12 +125,12 @@ async function handleRoute(request, { params }) {
       }
 
       const coins = Math.max(0, Number(coinsEarned) || 0)
-      db.users.updateCoinsStreak(userId, coins, streak, now)
+      d.users.updateCoinsStreak(userId, coins, streak, now)
 
       // Upsert progress, keeping the best score/stars
       const newStars = Number(stars) || 0
       const newScore = Number(score) || 0
-      db.progress.upsert({
+      d.progress.upsert({
         userId,
         worldId,
         levelNumber: Number(levelNumber),
@@ -188,7 +190,7 @@ async function handleRoute(request, { params }) {
         createdAt: new Date(),
       }
 
-      db.users.create(user)
+      d.users.create(user)
       const token = await signToken({ userId: user.id, email: user.email })
       const { password_hash: _, ...safeUser } = user
       return handleCORS(NextResponse.json({ user: safeUser, token, progress: [] }, { status: 201 }))
