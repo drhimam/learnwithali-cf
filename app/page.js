@@ -920,9 +920,11 @@ function App() {
   const progressMap = {}
   for (const p of progress) progressMap[`${p.worldId}-${p.levelNumber}`] = p
 
-  // Redirect based on auth state when loading finishes
+  // Redirect based on auth state only on initial load
+  const hasInitialized = useRef(false)
   useEffect(() => {
-    if (!loading) {
+    if (!loading && !hasInitialized.current) {
+      hasInitialized.current = true
       if (user) { setScreen('map') }
       else { setScreen('landing') }
     }
