@@ -7,10 +7,5 @@ binding = "DB"
 database_name = "learnwithali-db"
 database_id = "1af646d1-fffd-4ba6-834b-dd1da1806b9f"
 
-[[env.production.d1_databases]]
-binding = "DB"
-database_name = "learnwithali-db-prod"
-database_id = ""  # Fill after running: wrangler d1 create learnwithali-db-prod
-
 [vars]
-# JWT_SECRET must be set via `wrangler secret put JWT_SECRET` — NEVER hardcode here
+# JWT_SECRET must be set in Cloudflare Pages dashboard → Settings → Environment variables
