@@ -277,7 +277,7 @@ function LandingPage({ onSignUp, onSignIn }) {
 
 
 // ---------------- Login Page ----------------
-function LoginPage({ onLogin, onBack }) {
+function LoginPage({ onLogin, onBack, onSignUp }) {
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [showPassword, setShowPassword] = useState(false)
@@ -355,7 +355,7 @@ function LoginPage({ onLogin, onBack }) {
 
         <p className="text-center text-gray-500 text-sm font-medium">
           Don&apos;t have an account?{' '}
-          <button onClick={onBack} className="text-indigo-500 hover:text-indigo-700 font-bold underline">
+          <button onClick={onSignUp} className="text-indigo-500 hover:text-indigo-700 font-bold underline">
             Sign Up
           </button>
         </p>
@@ -1003,7 +1003,7 @@ function App() {
   }
 
   if (screen === 'login') {
-    return <LoginPage onLogin={handleAuthSuccess} onBack={() => setScreen('landing')} />
+    return <LoginPage onLogin={handleAuthSuccess} onBack={() => setScreen('landing')} onSignUp={() => setScreen('signup')} />
   }
 
   if (screen === 'signup' || screen === 'profile') {
